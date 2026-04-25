@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Pedido – Soft Pluma</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:    #0d1f3c;
+  --navy2:   #162b52;
+  --blue:    #1a4a8a;
+  --sky:     #2e7fd4;
+  --accent:  #f0a500;
+  --accent2: #ffc94a;
+  --green:   #1aaa6b;
+  --green2:  #0e7a4a;
+  --red:     #e84040;
+  --light:   #f0f4fb;
+  --white:   #ffffff;
+  --text:    #1a2540;
+  --muted:   #6b7a99;
+  --border:  #d8e2f5;
+  --card:    #ffffff;
+  --shadow:  0 4px 24px rgba(13,31,60,0.10);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--light);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  background: linear-gradient(100deg, var(--navy) 0%, var(--blue) 100%);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 16px rgba(13,31,60,0.25);
+}
+.topbar-brand {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--white);
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.topbar-brand span { color: var(--accent2); }
+.topbar-info {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.4px;
+}
+
+/* ── LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  max-width: 1280px;
+  margin: 28px auto;
+  padding: 0 24px 60px;
+}
+
+/* ── SECTION TITLE ── */
+.sec-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sec-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.card-head {
+  background: linear-gradient(90deg, var(--navy) 0%, var(--navy2) 100%);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-head h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--white);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.card-head .tag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.tag-premium { background: linear-gradient(90deg,#b8860b,var(--accent)); color:#fff; }
+.tag-confort  { background: linear-gradient(90deg,var(--sky),var(--blue)); color:#fff; }
+.tag-entrada  { background: linear-gradient(90deg,#38a169,#276749); color:#fff; }
+
+.card-body { padding: 16px 20px 20px; }
+
+/* ── PRODUCT GRID ── */
+.prod-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 10px;
+}
+.prod-item {
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.18s;
+  position: relative;
+  background: var(--light);
+}
+.prod-item:hover {
+  border-color: var(--sky);
+  background: #eef4fd;
+  transform: translateY(-1px);
+}
+.prod-item.selected {
+  border-color: var(--green);
+  background: #e8faf3;
+  box-shadow: 0 0 0 3px rgba(26,170,107,0.15);
+}
+.prod-item .pi-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+.prod-item .pi-size {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.prod-item .pi-custo-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent);
+  margin-top: 8px;
+}
+.prod-item .pi-price {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--navy);
+  margin-top: 1px;
+  line-height: 1.1;
+}
+.prod-item .pi-venda-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  background: rgba(46,127,212,0.08);
+  border-radius: 5px;
+  padding: 3px 7px;
+}
+.prod-item .pi-check {
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem;
+  transition: all 0.15s;
+}
+.prod-item.selected .pi-check {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+/* QTY CONTROLS */
+.qty-row {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.prod-item.selected .qty-row { display: flex; }
+.qty-btn {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--navy);
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.qty-btn:hover { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.qty-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--navy);
+  min-width: 22px;
+  text-align: center;
+}
+.qty-label { font-size: 0.72rem; color: var(--muted); }
+
+/* ── RIGHT PANEL ── */
+.right-panel { position: sticky; top: 88px; height: fit-content; }
+
+/* PEDIDO CARD */
+.pedido-card {
+  background: var(--card);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.pedido-head {
+  background: linear-gradient(100deg, var(--navy) 0%, var(--blue) 100%);
+  padding: 16px 20px;
+}
+.pedido-head h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--white);
+  letter-spacing: -0.2px;
+}
+.pedido-head .pedido-num {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.55);
+  margin-top: 2px;
+}
+
+.pedido-body { padding: 16px 20px; }
+
+.pedido-empty {
+  text-align: center;
+  padding: 32px 0;
+  color: var(--muted);
+}
+.pedido-empty .icon { font-size: 2.5rem; margin-bottom: 8px; }
+.pedido-empty p { font-size: 0.82rem; }
+
+.item-list { margin-bottom: 4px; }
+.order-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+.order-item:last-child { border-bottom: none; }
+.oi-bullet {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.oi-name { font-size: 0.8rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+.oi-detail { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+.oi-right { margin-left: auto; text-align: right; flex-shrink: 0; }
+.oi-price { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--navy); }
+.oi-qty { font-size: 0.7rem; color: var(--muted); }
+.oi-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 2px;
+  transition: color 0.15s;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.oi-remove:hover { color: var(--red); }
+
+/* TOTALS */
+.totals-box {
+  background: var(--light);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-top: 12px;
+  border: 1px solid var(--border);
+}
+.tot-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.tot-row.main {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--navy);
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 2px solid var(--border);
+  margin-bottom: 0;
+}
+.tot-row.main span:last-child { color: var(--green2); }
+.tot-row .green { color: var(--green2); font-weight: 600; }
+
+/* VENDEDOR */
+.vendedor-row {
+  margin-top: 14px;
+}
+.vend-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 6px;
+}
+.vend-input {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.vend-input:focus { border-color: var(--sky); }
+
+/* OBSERVAÇÃO */
+.obs-input {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  background: var(--white);
+  resize: vertical;
+  min-height: 60px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.obs-input:focus { border-color: var(--sky); }
+
+/* PAGAMENTO */
+.pgto-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 6px;
+}
+.pgto-opt {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--muted);
+  transition: all 0.15s;
+  background: var(--white);
+}
+.pgto-opt:hover { border-color: var(--sky); color: var(--sky); }
+.pgto-opt.active { border-color: var(--navy); background: var(--navy); color: var(--white); }
+.pgto-opt .pgto-icon { font-size: 1.1rem; display: block; margin-bottom: 3px; }
+
+/* DESCONTO */
+.desc-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  align-items: center;
+}
+.desc-input {
+  width: 80px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.85rem;
+  font-family: 'DM Sans', sans-serif;
+  text-align: center;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.desc-input:focus { border-color: var(--accent); }
+.desc-label { font-size: 0.8rem; color: var(--muted); }
+.desc-result { font-size: 0.8rem; font-weight: 600; color: var(--red); }
+
+/* BUTTONS */
+.btn-pdf {
+  width: 100%;
+  background: linear-gradient(90deg, var(--green2), var(--green));
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.btn-pdf:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(14,122,74,0.3); }
+.btn-pdf:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-clear {
+  width: 100%;
+  background: none;
+  color: var(--muted);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 8px;
+}
+.btn-clear:hover { border-color: var(--red); color: var(--red); }
+
+/* PARCELAMENTO INFO */
+.parc-info {
+  background: linear-gradient(90deg, rgba(46,127,212,0.1), rgba(26,74,138,0.08));
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--sky);
+  font-weight: 500;
+  text-align: center;
+}
+
+/* COUNTER BADGE */
+.counter-badge {
+  background: var(--accent);
+  color: var(--navy);
+  font-size: 0.65rem;
+  font-weight: 800;
+  border-radius: 20px;
+  padding: 2px 7px;
+  font-family: 'Syne', sans-serif;
+}
+
+/* ── PRINT / PDF AREA ── */
+@media print {
+  body * { visibility: hidden !important; }
+  #print-area, #print-area * { visibility: visible !important; }
+  #print-area {
+    position: fixed;
+    left: 0; top: 0;
+    width: 100%;
+    background: white;
+  }
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(13,31,60,0.6);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--white);
+  border-radius: 20px;
+  width: 700px;
+  max-width: 96vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(13,31,60,0.3);
+  animation: modalIn 0.2s ease;
+}
+@keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(10px); } to { opacity:1; transform:none; } }
+
+.modal-close {
+  position: absolute;
+  top: 16px; right: 20px;
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: rgba(255,255,255,0.7);
+  line-height: 1;
+  transition: color 0.15s;
+}
+.modal-close:hover { color: white; }
+
+/* PRINT DOC STYLES */
+#print-area {
+  display: none;
+  padding: 40px;
+  font-family: 'DM Sans', sans-serif;
+}
+.print-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 3px solid #0d1f3c;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+}
+.print-brand-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0d1f3c;
+  line-height: 1;
+}
+.print-brand-name span { color: #f0a500; }
+.print-brand-sub { font-size: 0.78rem; color: #6b7a99; margin-top: 4px; }
+.print-doc-info { text-align: right; }
+.print-doc-num { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: #0d1f3c; }
+.print-doc-date { font-size: 0.78rem; color: #6b7a99; margin-top: 4px; }
+
+.print-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.print-meta-box {
+  background: #f0f4fb;
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+.print-meta-box label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #6b7a99; display: block; margin-bottom: 4px; }
+.print-meta-box .val { font-size: 0.9rem; font-weight: 600; color: #1a2540; }
+
+.print-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+.print-table th {
+  background: #0d1f3c;
+  color: white;
+  padding: 10px 12px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  font-weight: 600;
+  text-align: left;
+}
+.print-table th:last-child, .print-table td:last-child { text-align: right; }
+.print-table td {
+  padding: 11px 12px;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #d8e2f5;
+  vertical-align: top;
+}
+.print-table tr:nth-child(even) td { background: #f8faff; }
+.print-table .td-name { font-weight: 600; color: #1a2540; }
+.print-table .td-sub { font-size: 0.72rem; color: #6b7a99; margin-top: 2px; }
+.print-table .td-price { font-family: 'Syne', sans-serif; font-weight: 700; color: #0d1f3c; }
+
+.print-totals {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+}
+.print-tot-box {
+  width: 280px;
+  border: 1.5px solid #d8e2f5;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.print-tot-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 16px;
+  font-size: 0.82rem;
+  border-bottom: 1px solid #d8e2f5;
+}
+.print-tot-row:last-child { border-bottom: none; }
+.print-tot-row.total-row {
+  background: #0d1f3c;
+  color: white;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+}
+.print-tot-row.total-row span:last-child { color: #ffc94a; }
+.print-tot-row .lbl { color: #6b7a99; }
+
+.print-obs {
+  background: #fffbf0;
+  border: 1.5px solid #ffc94a;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  font-size: 0.82rem;
+  color: #1a2540;
+}
+.print-obs label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #6b7a99; display: block; margin-bottom: 4px; }
+
+.print-footer {
+  border-top: 1px solid #d8e2f5;
+  padding-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  color: #6b7a99;
+}
+.print-assinatura {
+  border-top: 1px solid #9aabb8;
+  width: 200px;
+  text-align: center;
+  padding-top: 6px;
+  font-size: 0.72rem;
+  color: #6b7a99;
+}
+
+/* BOLETO GRID */
+.boleto-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.boleto-opt {
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 4px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--white);
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.boleto-opt:hover { border-color: var(--accent); background: #fffbf0; }
+.boleto-opt.active { border-color: var(--accent); background: linear-gradient(135deg,#fffbf0,#fff3d0); box-shadow: 0 0 0 2px rgba(240,165,0,0.2); }
+.bol-num { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800; color: var(--navy); }
+.bol-val { font-size: 0.68rem; font-weight: 700; color: var(--accent); line-height: 1.2; }
+.bol-label { font-size: 0.58rem; color: var(--muted); }
+.boleto-resumo {
+  background: linear-gradient(90deg, rgba(240,165,0,0.12), rgba(240,165,0,0.06));
+  border: 1px solid rgba(240,165,0,0.3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  color: var(--text);
+  text-align: center;
+}
+.boleto-resumo strong { color: var(--navy); }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .right-panel { position: static; }
+  .topbar { padding: 0 16px; }
+}
+@media (max-width: 560px) {
+  .prod-grid { grid-template-columns: 1fr 1fr; }
+  .pgto-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    🛏️ <span>César Paz</span> — Sistema de Pedidos · Soft Pluma
+  </div>
+  <div class="topbar-info">Tabela Abril/2026 · Uso interno · César Paz</div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT: CATALOG -->
+  <div class="left-col">
+
+    <!-- SAINT GERMAIN -->
+    <div class="card" id="sec-saint">
+      <div class="card-head">
+        <h2>Saint Germain Pocket</h2>
+        <span class="tag tag-premium">Premium · 30cm</span>
+      </div>
+      <div class="card-body">
+        <div class="prod-grid" id="grid-saint"></div>
+      </div>
+    </div>
+
+    <!-- ECO CONFORT -->
+    <div class="card" id="sec-eco">
+      <div class="card-head">
+        <h2>Eco Confort Pocket</h2>
+        <span class="tag tag-confort">Confort · 32cm</span>
+      </div>
+      <div class="card-body">
+        <div class="prod-grid" id="grid-eco"></div>
+      </div>
+    </div>
+
+    <!-- PRIME SUEDE -->
+    <div class="card" id="sec-suede">
+      <div class="card-head">
+        <h2>Prime Pocket Suede</h2>
+        <span class="tag tag-premium">Premium · 30cm · Suede</span>
+      </div>
+      <div class="card-body">
+        <div class="prod-grid" id="grid-suede"></div>
+      </div>
+    </div>
+
+    <!-- PRIME 22 -->
+    <div class="card" id="sec-p22">
+      <div class="card-head">
+        <h2>Prime Pocket 22cm</h2>
+        <span class="tag tag-entrada">Entrada · 22cm</span>
+      </div>
+      <div class="card-body">
+        <div class="prod-grid" id="grid-p22"></div>
+      </div>
+    </div>
+
+    <!-- PRIME 24 -->
+    <div class="card" id="sec-p24">
+      <div class="card-head">
+        <h2>Prime Pocket 24cm</h2>
+        <span class="tag tag-entrada">Entrada · 24cm</span>
+      </div>
+      <div class="card-body">
+        <div class="prod-grid" id="grid-p24"></div>
+      </div>
+    </div>
+
+    <!-- CANNES -->
+    <div class="card" id="sec-cannes">
+      <div class="card-head">
+        <h2>Cannes Premium D-33</h2>
+        <span class="tag tag-confort">Confort · 25cm · Malha Fria</span>
+      </div>
+      <div class="card-body">
+        <div class="prod-grid" id="grid-cannes"></div>
+      </div>
+    </div>
+
+  </div><!-- /left -->
+
+  <!-- RIGHT: PEDIDO -->
+  <div class="right-panel">
+    <div class="pedido-card">
+      <div class="pedido-head" style="position:relative;">
+        <h3>🧾 Pedido <span class="counter-badge" id="item-count">0</span></h3>
+        <div class="pedido-num" id="pedido-num">—</div>
+      </div>
+      <div class="pedido-body">
+
+        <!-- EMPTY -->
+        <div class="pedido-empty" id="pedido-empty">
+          <div class="icon">🛒</div>
+          <p>Selecione os produtos<br>ao lado para montar o pedido</p>
+        </div>
+
+        <!-- ITEMS -->
+        <div class="item-list" id="item-list"></div>
+
+        <!-- TOTALS -->
+        <div class="totals-box" id="totals-box" style="display:none;">
+          <div class="tot-row"><span>Subtotal custo:</span><span id="tot-subtotal">R$ 0,00</span></div>
+          <div class="tot-row" id="tot-desc-row" style="display:none;"><span>Desconto:</span><span class="desc-result" id="tot-desconto">-R$ 0,00</span></div>
+          <div class="tot-row main"><span>TOTAL CUSTO:</span><span id="tot-total">R$ 0,00</span></div>
+        </div>
+
+        <!-- VENDEDOR -->
+        <div class="vendedor-row" id="vendedor-row" style="display:none;">
+          <div class="vend-label">👤 Vendedor</div>
+          <input type="text" class="vend-input" id="vendedor-input" placeholder="Nome do vendedor..." />
+        </div>
+
+        <!-- PAGAMENTO -->
+        <div id="pgto-section" style="display:none; margin-top:14px;">
+          <div class="vend-label">💳 Forma de Pagamento</div>
+          <div class="pgto-grid">
+            <div class="pgto-opt active" onclick="setPgto(this,'À Vista')"><span class="pgto-icon">💵</span>À Vista</div>
+            <div class="pgto-opt" onclick="setPgto(this,'Pix')"><span class="pgto-icon">📱</span>Pix</div>
+            <div class="pgto-opt" onclick="setPgto(this,'Cartão')"><span class="pgto-icon">💳</span>Cartão</div>
+            <div class="pgto-opt" onclick="setPgto(this,'Boleto')"><span class="pgto-icon">🏦</span>Boleto</div>
+          </div>
+
+          <!-- BOLETO PARCELAS (aparece só quando Boleto selecionado) -->
+          <div id="boleto-section" style="display:none; margin-top:12px;">
+            <div class="vend-label" style="margin-bottom:8px;">📄 Número de Boletos</div>
+            <div class="boleto-grid" id="boleto-grid">
+              <div class="boleto-opt active" onclick="setBoleto(this,1)">
+                <span class="bol-num">1×</span>
+                <span class="bol-val" id="bol-1">R$ 0,00</span>
+                <span class="bol-label">à vista</span>
+              </div>
+              <div class="boleto-opt" onclick="setBoleto(this,2)">
+                <span class="bol-num">2×</span>
+                <span class="bol-val" id="bol-2">R$ 0,00</span>
+                <span class="bol-label">por boleto</span>
+              </div>
+              <div class="boleto-opt" onclick="setBoleto(this,3)">
+                <span class="bol-num">3×</span>
+                <span class="bol-val" id="bol-3">R$ 0,00</span>
+                <span class="bol-label">por boleto</span>
+              </div>
+              <div class="boleto-opt" onclick="setBoleto(this,4)">
+                <span class="bol-num">4×</span>
+                <span class="bol-val" id="bol-4">R$ 0,00</span>
+                <span class="bol-label">por boleto</span>
+              </div>
+              <div class="boleto-opt" onclick="setBoleto(this,5)">
+                <span class="bol-num">5×</span>
+                <span class="bol-val" id="bol-5">R$ 0,00</span>
+                <span class="bol-label">por boleto</span>
+              </div>
+            </div>
+            <div class="boleto-resumo" id="boleto-resumo">
+              Total: <strong id="bol-total-val">R$ 0,00</strong> em <strong id="bol-parcelas-txt">1 boleto</strong> de <strong id="bol-valor-txt">R$ 0,00</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- DESCONTO -->
+        <div id="desc-section" style="display:none; margin-top:14px;">
+          <div class="vend-label">🏷️ Desconto (%)</div>
+          <div class="desc-row">
+            <input type="number" class="desc-input" id="desc-input" min="0" max="30" step="0.5" value="0" oninput="updateDesconto()" />
+            <span class="desc-label">% de desconto</span>
+            <span class="desc-result" id="desc-display"></span>
+          </div>
+        </div>
+
+        <!-- OBSERVAÇÃO -->
+        <div id="obs-section" style="display:none; margin-top:14px;">
+          <div class="vend-label">📝 Observações</div>
+          <textarea class="obs-input" id="obs-input" placeholder="Observações do pedido (prazo, entrega, condições...)"></textarea>
+        </div>
+
+        <!-- BUTTONS -->
+        <button class="btn-pdf" id="btn-pdf" onclick="gerarPDF()" disabled>
+          🖨️ Gerar PDF / Imprimir
+        </button>
+        <button class="btn-clear" id="btn-clear" onclick="limparPedido()" style="display:none;">
+          🗑️ Limpar Pedido
+        </button>
+
+      </div>
+    </div>
+  </div><!-- /right -->
+</div>
+
+<!-- PRINT AREA (hidden, shown on print) -->
+<div id="print-area">
+  <div class="print-header">
+    <div>
+      <div class="print-brand-name">Soft <span>Pluma</span></div>
+      <div class="print-brand-sub">Colchões · Sinta-se nas nuvens</div>
+    </div>
+    <div class="print-doc-info">
+      <div class="print-doc-num" id="p-num"></div>
+      <div class="print-doc-date" id="p-date"></div>
+    </div>
+  </div>
+
+  <div class="print-meta">
+    <div class="print-meta-box">
+      <label>Vendedor</label>
+      <div class="val" id="p-vendedor">—</div>
+    </div>
+    <div class="print-meta-box">
+      <label>Forma de Pagamento</label>
+      <div class="val" id="p-pgto">À Vista</div>
+    </div>
+  </div>
+
+  <table class="print-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Produto</th>
+        <th>Cód.</th>
+        <th style="text-align:center">Qtd.</th>
+        <th>Custo Unit.</th>
+        <th>Subtotal</th>
+      </tr>
+    </thead>
+    <tbody id="p-items"></tbody>
+  </table>
+
+  <div class="print-totals">
+    <div class="print-tot-box">
+      <div class="print-tot-row"><span class="lbl">Subtotal</span><span id="p-subtotal">R$ 0,00</span></div>
+      <div class="print-tot-row" id="p-desc-row" style="display:none;"><span class="lbl">Desconto</span><span id="p-desconto" style="color:#e84040;">-R$ 0,00</span></div>
+      <div class="print-tot-row total-row"><span>TOTAL</span><span id="p-total">R$ 0,00</span></div>
+      <div class="print-tot-row"><span class="lbl">Pagamento</span><span id="p-pgto2">À Vista</span></div>
+    </div>
+  </div>
+
+  <div class="print-obs" id="p-obs-box" style="display:none;">
+    <label>Observações</label>
+    <div id="p-obs"></div>
+  </div>
+
+  <div class="print-footer">
+    <div>
+      <div style="font-weight:600;color:#1a2540;margin-bottom:3px;">Soft Pluma Colchões</div>
+      <div>Tabela vigente: Abril/2026 · Documento de uso interno · César Paz</div>
+    </div>
+    <div class="print-assinatura">Assinatura do Responsável</div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+
+const SIZES = [
+  { dim: '88×188', name: 'Solteiro' },
+  { dim: '108×198', name: 'Solteirão' },
+  { dim: '138×188', name: 'Casal ⭐' },
+  { dim: '158×198', name: 'Queen' },
+  { dim: '193×203', name: 'King' },
+];
+
+// Preços sugeridos calculados com markup 60% sobre custo CJ Box (arredondados comercialmente)
+const CATALOG = {
+  saint: {
+    name: 'Saint Germain Pocket 30cm',
+    tech: 'Molas Pocket',
+    items: [
+      { cod:'124/160', custo:638.66,  preco:1022 },  // 638.66 × 1.60 = 1021,86
+      { cod:'125/162', custo:766.92,  preco:1229 },  // 766.92 × 1.60 = 1227,07
+      { cod:'126/163', custo:943.95,  preco:1509 },  // 943.95 × 1.60 = 1510,32
+      { cod:'127/159', custo:1259.34, preco:2015 },  // 1259.34 × 1.60 = 2014,94
+      { cod:'128/161', custo:1511.03, preco:2419 },  // 1511.03 × 1.60 = 2417,65
+    ]
+  },
+  eco: {
+    name: 'Eco Confort Pocket 32cm',
+    tech: 'Molas Pocket',
+    items: [
+      { cod:'115/156', custo:803.14,  preco:1285 },  // 803.14 × 1.60 = 1285,02
+      { cod:'116/158', custo:1078.72, preco:1726 },  // 1078.72 × 1.60 = 1725,95
+      { cod:'117/155', custo:1369.62, preco:2192 },  // 1369.62 × 1.60 = 2191,39
+      { cod:'118/157', custo:1620.14, preco:2593 },  // 1620.14 × 1.60 = 2592,22
+    ],
+    skipSizes: [1]
+  },
+  suede: {
+    name: 'Prime Pocket Suede 30cm',
+    tech: 'Molas Pocket · Suede',
+    items: [
+      { cod:'1669/1631', custo:575.80,  preco:921 },   // 575.80 × 1.60 = 921,28
+      { cod:'1670/1632', custo:728.22,  preco:1165 },  // 728.22 × 1.60 = 1165,15
+      { cod:'1671/1634', custo:829.00,  preco:1327 },  // 829.00 × 1.60 = 1326,40
+      { cod:'1672/1630', custo:1084.66, preco:1736 },  // 1084.66 × 1.60 = 1735,46
+      { cod:'1673/1633', custo:1389.11, preco:2223 },  // 1389.11 × 1.60 = 2222,58
+    ]
+  },
+  p22: {
+    name: 'Prime Pocket 22cm',
+    tech: 'Molas Pocket',
+    items: [
+      { cod:'1540/173', custo:476.16,  preco:762 },   // 476.16 × 1.60 = 761,86
+      { cod:'1541/174', custo:616.35,  preco:987 },   // 616.35 × 1.60 = 986,16
+      { cod:'1542/176', custo:659.00,  preco:1055 },  // 659.00 × 1.60 = 1054,40
+      { cod:'1543/172', custo:917.24,  preco:1468 },  // 917.24 × 1.60 = 1467,58
+      { cod:'1544/175', custo:1168.21, preco:1870 },  // 1168.21 × 1.60 = 1869,14
+    ]
+  },
+  p24: {
+    name: 'Prime Pocket 24cm',
+    tech: 'Molas Pocket',
+    items: [
+      { cod:'181/173', custo:504.57,  preco:807 },   // 504.57 × 1.60 = 807,31
+      { cod:'177/174', custo:657.65,  preco:1053 },  // 657.65 × 1.60 = 1052,24
+      { cod:'178/176', custo:699.00,  preco:1119 },  // 699.00 × 1.60 = 1118,40
+      { cod:'179/172', custo:971.13,  preco:1554 },  // 971.13 × 1.60 = 1553,81
+      { cod:'180/175', custo:1238.61, preco:1982 },  // 1238.61 × 1.60 = 1981,78
+    ]
+  },
+  cannes: {
+    name: 'Cannes Premium D-33 25cm',
+    tech: 'Espuma D-33 · Malha Fria',
+    items: [
+      { cod:'100/142', custo:713.66,  preco:1142 },  // 713.66 × 1.60 = 1141,86
+      { cod:'101/206', custo:921.98,  preco:1476 },  // 921.98 × 1.60 = 1475,17
+      { cod:'102/144', custo:1038.00, preco:1661 },  // 1038.00 × 1.60 = 1660,80
+      { cod:'103/141', custo:1427.31, preco:2284 },  // 1427.31 × 1.60 = 2283,70
+      { cod:'104/143', custo:1760.29, preco:2817 },  // 1760.29 × 1.60 = 2816,46
+    ]
+  }
+};
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+let cart = {}; // key: `${line}-${idx}` → {qty, item, size, lineName, tech, custo}
+let pgto = 'À Vista';
+let pedidoNum = gerarNumPedido();
+
+function gerarNumPedido() {
+  const d = new Date();
+  return `PED-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${Math.floor(Math.random()*9000+1000)}`;
+}
+
+// ─── RENDER CATALOG ──────────────────────────────────────────────────────────
+
+function buildCatalog() {
+  Object.entries(CATALOG).forEach(([lineKey, line]) => {
+    const grid = document.getElementById(`grid-${lineKey}`);
+    const sizes = line.skipSizes
+      ? SIZES.filter((_, i) => !line.skipSizes.includes(i))
+      : SIZES;
+
+    line.items.forEach((item, idx) => {
+      const size = sizes[idx] || SIZES[idx];
+      const key = `${lineKey}-${idx}`;
+
+      const div = document.createElement('div');
+      div.className = 'prod-item';
+      div.id = `prod-${key}`;
+      div.innerHTML = `
+        <div class="pi-check" id="check-${key}">✓</div>
+        <div class="pi-name">${line.name}</div>
+        <div class="pi-size">📐 ${size.dim} — ${size.name}</div>
+        <div class="pi-custo-label">💰 CUSTO CJ BOX</div>
+        <div class="pi-price">R$ ${fmt(item.custo)}</div>
+        <div class="qty-row" id="qty-${key}">
+          <button class="qty-btn" onclick="changeQty('${key}',-1,event)">−</button>
+          <span class="qty-val" id="qv-${key}">1</span>
+          <button class="qty-btn" onclick="changeQty('${key}',1,event)">+</button>
+          <span class="qty-label">unid.</span>
+        </div>
+      `;
+      div.addEventListener('click', () => toggleItem(key, item, size, line));
+      grid.appendChild(div);
+    });
+  });
+
+  document.getElementById('pedido-num').textContent = pedidoNum;
+}
+
+// ─── TOGGLE ITEM ─────────────────────────────────────────────────────────────
+function toggleItem(key, item, size, line) {
+  if (cart[key]) {
+    delete cart[key];
+    document.getElementById(`prod-${key}`).classList.remove('selected');
+  } else {
+    cart[key] = { qty: 1, item, size, lineName: line.name, tech: line.tech, custo: item.custo };
+    document.getElementById(`prod-${key}`).classList.add('selected');
+  }
+  renderCart();
+}
+
+function changeQty(key, delta, e) {
+  e.stopPropagation();
+  if (!cart[key]) return;
+  cart[key].qty = Math.max(1, cart[key].qty + delta);
+  document.getElementById(`qv-${key}`).textContent = cart[key].qty;
+  renderCart();
+}
+
+// ─── RENDER CART ─────────────────────────────────────────────────────────────
+function renderCart() {
+  const list = document.getElementById('item-list');
+  const empty = document.getElementById('pedido-empty');
+  const totalsBox = document.getElementById('totals-box');
+  const vendedorRow = document.getElementById('vendedor-row');
+  const pgtoSec = document.getElementById('pgto-section');
+  const descSec = document.getElementById('desc-section');
+  const obsSec = document.getElementById('obs-section');
+  const btnClear = document.getElementById('btn-clear');
+  const btnPdf = document.getElementById('btn-pdf');
+  const count = Object.keys(cart).length;
+
+  document.getElementById('item-count').textContent = count;
+
+  if (count === 0) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    totalsBox.style.display = 'none';
+    vendedorRow.style.display = 'none';
+    pgtoSec.style.display = 'none';
+    descSec.style.display = 'none';
+    obsSec.style.display = 'none';
+    btnClear.style.display = 'none';
+    btnPdf.disabled = true;
+    return;
+  }
+
+  empty.style.display = 'none';
+  totalsBox.style.display = 'block';
+  vendedorRow.style.display = 'block';
+  pgtoSec.style.display = 'block';
+  descSec.style.display = 'block';
+  obsSec.style.display = 'block';
+  btnClear.style.display = 'block';
+  btnPdf.disabled = false;
+
+  list.innerHTML = '';
+  let subtotal = 0, totalCusto = 0;
+
+  Object.entries(cart).forEach(([key, entry]) => {
+    const subCusto = entry.custo * entry.qty;
+    subtotal += subCusto;
+    totalCusto += subCusto;
+
+    const el = document.createElement('div');
+    el.className = 'order-item';
+    el.innerHTML = `
+      <div class="oi-bullet"></div>
+      <div style="flex:1">
+        <div class="oi-name">${entry.lineName}</div>
+        <div class="oi-detail">${entry.size.dim} — ${entry.size.name} · ${entry.tech}</div>
+      </div>
+      <div class="oi-right">
+        <div class="oi-price">R$ ${fmt(subCusto)}</div>
+        <div class="oi-qty">${entry.qty}x R$ ${fmt(entry.custo)} <span style="font-size:0.65rem;color:var(--muted)">(custo)</span></div>
+      </div>
+      <button class="oi-remove" onclick="removeItem('${key}')" title="Remover">✕</button>
+    `;
+    list.appendChild(el);
+  });
+
+  const descPct = parseFloat(document.getElementById('desc-input').value) || 0;
+  const descVal = subtotal * (descPct / 100);
+  const total = subtotal - descVal;
+
+  document.getElementById('tot-subtotal').textContent = `R$ ${fmt(subtotal)}`;
+  document.getElementById('tot-total').textContent = `R$ ${fmt(total)}`;
+
+  // Atualiza boleto se estiver selecionado
+  if (pgto === 'Boleto' || pgto.startsWith('Boleto')) atualizarBoleto();
+
+  const descRow = document.getElementById('tot-desc-row');
+  if (descPct > 0) {
+    descRow.style.display = 'flex';
+    document.getElementById('tot-desconto').textContent = `-R$ ${fmt(descVal)}`;
+  } else {
+    descRow.style.display = 'none';
+  }
+}
+
+function removeItem(key) {
+  delete cart[key];
+  const el = document.getElementById(`prod-${key}`);
+  if (el) el.classList.remove('selected');
+  renderCart();
+}
+
+function updateDesconto() {
+  const pct = parseFloat(document.getElementById('desc-input').value) || 0;
+  const subtotal = Object.values(cart).reduce((s, e) => s + e.item.preco * e.qty, 0);
+  const val = subtotal * (pct / 100);
+  document.getElementById('desc-display').textContent = pct > 0 ? `-R$ ${fmt(val)}` : '';
+  renderCart();
+}
+
+let boletoQtd = 1;
+
+function setPgto(el, val) {
+  document.querySelectorAll('.pgto-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  pgto = val;
+  const boletoSec = document.getElementById('boleto-section');
+  if (val === 'Boleto') {
+    boletoSec.style.display = 'block';
+    atualizarBoleto();
+  } else {
+    boletoSec.style.display = 'none';
+  }
+}
+
+function setBoleto(el, qtd) {
+  document.querySelectorAll('.boleto-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  boletoQtd = qtd;
+  pgto = `Boleto ${qtd}×`;
+  atualizarBoleto();
+}
+
+function atualizarBoleto() {
+  const subtotal = Object.values(cart).reduce((s, e) => s + e.item.preco * e.qty, 0);
+  const descPct = parseFloat(document.getElementById('desc-input').value) || 0;
+  const total = subtotal * (1 - descPct / 100);
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById(`bol-${i}`);
+    if (el) el.textContent = `R$ ${fmt(total / i)}`;
+  }
+  const parcTxt = boletoQtd === 1 ? '1 boleto' : `${boletoQtd} boletos`;
+  document.getElementById('bol-total-val').textContent  = `R$ ${fmt(total)}`;
+  document.getElementById('bol-parcelas-txt').textContent = parcTxt;
+  document.getElementById('bol-valor-txt').textContent  = `R$ ${fmt(total / boletoQtd)}`;
+}
+
+function limparPedido() {
+  Object.keys(cart).forEach(key => {
+    delete cart[key];
+    const el = document.getElementById(`prod-${key}`);
+    if (el) el.classList.remove('selected');
+    const qv = document.getElementById(`qv-${key}`);
+    if (qv) qv.textContent = '1';
+  });
+  cart = {};
+  document.getElementById('desc-input').value = 0;
+  pedidoNum = gerarNumPedido();
+  document.getElementById('pedido-num').textContent = pedidoNum;
+  renderCart();
+}
+
+// ─── GERAR PDF ───────────────────────────────────────────────────────────────
+function gerarPDF() {
+  const vendedor = document.getElementById('vendedor-input').value || 'Não informado';
+  const obs = document.getElementById('obs-input').value;
+  const descPct = parseFloat(document.getElementById('desc-input').value) || 0;
+
+  let subtotal = 0;
+  const entries = Object.entries(cart);
+
+  // Fill print table
+  const tbody = document.getElementById('p-items');
+  tbody.innerHTML = '';
+  entries.forEach(([key, entry], i) => {
+    const sub = entry.custo * entry.qty;
+    subtotal += sub;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td>
+        <div class="td-name">${entry.lineName}</div>
+        <div class="td-sub">${entry.size.dim} — ${entry.size.name} · ${entry.tech}</div>
+      </td>
+      <td><span style="font-size:0.72rem;background:#f0f4fb;padding:2px 6px;border-radius:4px;">${entry.item.cod}</span></td>
+      <td style="text-align:center;font-weight:700;">${entry.qty}</td>
+      <td class="td-price">R$ ${fmt(entry.custo)}</td>
+      <td class="td-price">R$ ${fmt(sub)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const descVal = subtotal * (descPct / 100);
+  const total = subtotal - descVal;
+
+  // Meta
+  const now = new Date();
+  document.getElementById('p-num').textContent = pedidoNum;
+  document.getElementById('p-date').textContent = `Emitido em: ${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+  document.getElementById('p-vendedor').textContent = vendedor;
+  document.getElementById('p-pgto').textContent  = pgto.startsWith('Boleto') ? `Boleto ${boletoQtd}× de R$ ${fmt(total/boletoQtd)}` : pgto;
+  document.getElementById('p-pgto2').textContent = pgto.startsWith('Boleto') ? `Boleto ${boletoQtd}× de R$ ${fmt(total/boletoQtd)}` : pgto;
+  document.getElementById('p-subtotal').textContent = `R$ ${fmt(subtotal)}`;
+  document.getElementById('p-total').textContent = `R$ ${fmt(total)}`;
+
+  const pDescRow = document.getElementById('p-desc-row');
+  if (descPct > 0) {
+    pDescRow.style.display = 'flex';
+    document.getElementById('p-desconto').textContent = `-R$ ${fmt(descVal)}`;
+  } else {
+    pDescRow.style.display = 'none';
+  }
+
+  const pObs = document.getElementById('p-obs-box');
+  if (obs.trim()) {
+    pObs.style.display = 'block';
+    document.getElementById('p-obs').textContent = obs;
+  } else {
+    pObs.style.display = 'none';
+  }
+
+  // Show print area and trigger print
+  const pa = document.getElementById('print-area');
+  pa.style.display = 'block';
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => { pa.style.display = 'none'; }, 500);
+  }, 100);
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function fmt(n) {
+  return n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+buildCatalog();
+</script>
+</body>
+</html>
